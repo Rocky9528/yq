@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xmlns:context="http://www.springframework.org/schema/context"
+	xmlns:dubbo="http://code.alibabatech.com/schema/dubbo"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
+		http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context-4.3.xsd
+		http://code.alibabatech.com/schema/dubbo http://code.alibabatech.com/schema/dubbo/dubbo.xsd">
+		
+		<!-- 
+		<bean id="" class="org.students.server.impl.StudentServerImpl"></bean>
+		 -->
+	<!-- 配置dubbo的应用名称 -->
+	
+	<dubbo:application name="students-server" />
+	<!-- 配置注册中心地址 -->
+	<dubbo:registry protocol="zookeeper" address="zookeeper://192.168.2.128:2181"  />
+	
+	<!-- 配置dubbo扫描包  ：将@Service所在包 放入 dubbo扫描中，供后续 dubbo在rpc时使用-->
+	<dubbo:annotation package="org.students.server.impl" />
+
+	<!-- 将@Service所在包 放入springIOC容器中，供后续 依赖注入时使用 -->
+	<context:component-scan base-package="org.student.service.impl"></context:component-scan>
+
+</beans>

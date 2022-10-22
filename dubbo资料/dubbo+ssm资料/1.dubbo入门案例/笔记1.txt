@@ -1,0 +1,340 @@
+开发dubbo程序
+1.准备环境
+	(1)linux中安装注册中心zookeeper
+	a.linux中安装jdk
+		下载jdk-8u171-linux-x64.rpm
+		安装 rpm -ivh jdk-8u171-linux-x64.rpm,会自动安装到usr目录中的java中，
+		通过pwd命令，查看jdk安装路径：/usr/java/jdk1.8.0_171-amd64
+
+		配置环境变量：
+		vi /etc/profile，在文件最后追加：
+export JAVA_HOME=/usr/java/jdk1.8.0_171-amd64
+export CLASSPATH=$JAVA_HOME/lib:$CLASSPATH
+export PATH=$JAVA_HOME/bin:$PATH
+
+刷新环境变量
+source /etc/profile
+	
+	b.安装zookeeper
+	下载zookeeper，
+	解压tar -zxvf zookeeper-3.4.12.tar.gz
+	重命名zookeeper的配置文件：
+	在conf目录中执行：  mv zoo_sample.cfg zoo.cfg
+
+	在zoo.cfg中：
+	可以发现 zookeeper的端口号是 clientPort=2181
+	设置zookeeper存放数据的目录：
+	dataDir=/apps/zookeeper-3.4.12/data
+	启动zookeeper：
+[root@bd1 zookeeper-3.4.12]# 
+bin/zkServer.sh stop
+bin/zkServer.sh status
+启动zookeeper
+bin/zkServer.sh start
+
+
+
+	服务方代码：
+	pom.xml
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+  <groupId>org.dubbo</groupId>
+  <artifactId>students-server</artifactId>
+  <version>0.0.1-SNAPSHOT</version>
+  <packaging>war</packaging>
+    <!-- 统一版本号  -->
+  <properties>
+  	<spring.version>4.3.17.RELEASE</spring.version>
+  </properties>
+  
+  <dependencies>
+	<dependency>
+	    <groupId>org.springframework</groupId>
+	    <artifactId>spring-context</artifactId>
+	    <version>${spring.version}</version>
+	</dependency>
+
+	<dependency>
+	    <groupId>org.springframework</groupId>
+	    <artifactId>spring-beans</artifactId>
+	    <version>${spring.version}</version>
+	</dependency>
+	
+	<dependency>
+	    <groupId>org.springframework</groupId>
+	    <artifactId>spring-webmvc</artifactId>
+	    <version>${spring.version}</version>
+	</dependency>
+	
+	
+	<dependency>
+	    <groupId>org.springframework</groupId>
+	    <artifactId>spring-aspects</artifactId>
+	    <version>${spring.version}</version>
+	</dependency>
+	
+	
+	<dependency>
+	    <groupId>org.springframework</groupId>
+	    <artifactId>spring-jms</artifactId>
+	    <version>${spring.version}</version>
+	</dependency>
+	
+	  <dependency>
+	    <groupId>commons-logging</groupId>
+	    <artifactId>commons-logging</artifactId>
+	    <version>1.1.1</version>
+	</dependency>
+	
+	
+	<dependency>
+	    <groupId>org.springframework</groupId>
+	    <artifactId>spring-context-support</artifactId>
+	    <version>${spring.version}</version>
+	</dependency>
+	
+	<!-- dubbo组件 -->
+	<dependency>
+	    <groupId>com.alibaba</groupId>
+	    <artifactId>dubbo</artifactId>
+	    <version>2.5.10</version>
+	</dependency>
+	
+	<!-- zookeeper -->
+	<dependency>
+	    <groupId>org.apache.zookeeper</groupId>
+	    <artifactId>zookeeper</artifactId>
+	    <version>3.4.12</version>
+	</dependency>
+	
+	<!-- zookeeper客户端 -->
+	<dependency>
+	    <groupId>com.github.sgroschupf</groupId>
+	    <artifactId>zkclient</artifactId>
+	    <version>0.1</version>
+	</dependency>
+	
+	
+	<dependency>
+	    <groupId>org.javassist</groupId>
+	    <artifactId>javassist</artifactId>
+	    <version>3.21.0-GA</version>
+	</dependency>
+	  
+  </dependencies>
+  
+      
+ <build>
+  <plugins>
+	    <plugin>
+	        <groupId>org.apache.maven.plugins</groupId>
+	        <artifactId>maven-compiler-plugin</artifactId>
+	        <version>3.7.0</version>
+	        <configuration>
+	            <source>1.8</source>
+	            <target>1.8</target>
+	            <encoding>UTF8</encoding>
+	        </configuration>
+	    </plugin>
+	 	
+	 	<!-- 给maven项目 内置一个tomcat，之后 可以直接运行 -->
+	    <plugin>
+	    <groupId>org.apache.tomcat.maven</groupId>
+	    <artifactId>tomcat7-maven-plugin</artifactId>
+	    <configuration>
+	        <port>8881</port>
+	        <path>/</path>          
+	     </configuration>
+	</plugin> 
+	</plugins>
+	</build>
+  
+</project>
+
+	服务方可以提供哪些服务：
+	接口及实现类：（具体的服务）
+public interface StudentServer {
+	public String server(String name);//zs
+}
+
+@Service//阿里巴巴提供的@Service注解
+public class StudentServerImpl  implements StudentServer{
+
+	public String server(String name) {
+		return "server:" +name;
+	}
+
+}
+	配置工作：
+	继承spring:web.xml
+	<web-app xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://java.sun.com/xml/ns/javaee" xsi:schemaLocation="http://java.sun.com/xml/ns/javaee http://java.sun.com/xml/ns/javaee/web-app_2_5.xsd" id="WebApp_ID" version="2.5">
+ <context-param>
+  	<param-name>contextConfigLocation</param-name>
+  	<param-value>classpath:applicationContext.xml</param-value>
+  </context-param>
+  
+  
+  <listener>
+  	<listener-class>org.springframework.web.context.ContextLoaderListener</listener-class>
+  </listener>
+</web-app>
+
+	配置spring: applicationContext.xml
+	<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xmlns:context="http://www.springframework.org/schema/context"
+	xmlns:dubbo="http://code.alibabatech.com/schema/dubbo"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
+		http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context-4.3.xsd
+		http://code.alibabatech.com/schema/dubbo http://code.alibabatech.com/schema/dubbo/dubbo.xsd">
+		
+		<!-- 
+		<bean id="" class="org.students.server.impl.StudentServerImpl"></bean>
+		 -->
+	<!-- 配置dubbo的应用名称 -->
+	
+	<dubbo:application name="students-server" />
+	<!-- 配置注册中心地址 -->
+	<dubbo:registry protocol="zookeeper" address="zookeeper://192.168.2.128:2181"  />
+	
+	<!-- 配置dubbo扫描包  ：将@Service所在包 放入 dubbo扫描中，供后续 dubbo在rpc时使用-->
+	<dubbo:annotation package="org.students.server.impl" />
+
+	<!-- 将@Service所在包 放入springIOC容器中，供后续 依赖注入时使用 -->
+	<context:component-scan base-package="org.student.service.impl"></context:component-scan>
+
+</beans>
+
+
+
+	消费方代码：
+	a.引入依赖(jar)
+		pom.xml (与服务方pom.xml一致，改端口号；并设置客户端自己的gav)
+	b.补齐web工程需要的 WEB-INF/web.xml
+<web-app xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://java.sun.com/xml/ns/javaee" xsi:schemaLocation="http://java.sun.com/xml/ns/javaee http://java.sun.com/xml/ns/javaee/web-app_2_5.xsd" id="WebApp_ID" version="2.5">
+ 
+  <!-- 解决post乱码   -->
+  <filter>
+  	<filter-name>CharacterEncodingfilter</filter-name>
+  	<filter-class>org.springframework.web.filter.CharacterEncodingFilter</filter-class>
+  	<init-param>
+  		<param-name>encoding</param-name>
+  		<param-value>UTF-8</param-value>
+  	</init-param>
+  		<init-param>
+  		<param-name>foreEncoding</param-name>
+  		<param-value>UTF-8</param-value>
+  	</init-param>
+  </filter>
+  
+  <filter-mapping>
+  	<filter-name>CharacterEncodingfilter</filter-name>
+	<url-pattern>/*</url-pattern>
+  </filter-mapping>
+
+  <servlet>
+  	<servlet-name>dispatcherServlet</servlet-name>
+  	<servlet-class>org.springframework.web.servlet.DispatcherServlet</servlet-class>
+  	<init-param>
+  		<param-name>contextConfigLocation</param-name>
+		<param-value>classpath:springmvc.xml</param-value>  		
+  	</init-param>
+  </servlet>
+  
+  <servlet-mapping>
+  	<servlet-name>dispatcherServlet</servlet-name>
+  	<url-pattern>*.action</url-pattern> 
+  </servlet-mapping>
+</web-app>
+
+	c.配置springmvc（通过springmvc 来访问 提供方）
+	<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xmlns:mvc="http://www.springframework.org/schema/mvc"
+	xmlns:dubbo="http://code.alibabatech.com/schema/dubbo"
+	xmlns:context="http://www.springframework.org/schema/context"
+	xsi:schemaLocation="http://www.springframework.org/schema/mvc http://www.springframework.org/schema/mvc/spring-mvc-4.3.xsd
+		http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
+		http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context-4.2.xsd
+		http://code.alibabatech.com/schema/dubbo http://code.alibabatech.com/schema/dubbo/dubbo.xsd">
+	<mvc:annotation-driven>
+		<!-- 此配置的目的：将Controller中的内容 直接打印到 浏览器中 -->
+		<mvc:message-converters register-defaults="false">
+			<bean class="org.springframework.http.converter.StringHttpMessageConverter">
+					<constructor-arg value="UTF-8"/>
+				</bean>
+		</mvc:message-converters>
+	</mvc:annotation-driven>
+	
+	
+	
+	
+	
+	
+
+	<!-- 配置dubbo的应用名称 -->
+	<dubbo:application name="students-consumer"/>
+	<!-- 配置注册中心地址 -->
+	<dubbo:registry address="zookeeper://192.168.2.128:2181" />
+	
+	
+	
+	
+	<!-- 配置dubbo扫描包 -->
+	<dubbo:annotation  package="org.controller"/>
+	<!-- 将控制器@Controller所在包 加入IOC容器 -->
+	<context:component-scan base-package="org.controller"></context:component-scan>
+		
+</beans>
+
+	编写控制器代码：
+	用于访问 服务方提供的服务代码
+package org.controller;
+
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
+import org.students.server.StudentServer;
+
+import com.alibaba.dubbo.config.annotation.Reference;
+//@Controller
+//@ResponseBody
+@RestController
+@RequestMapping("controller")
+public class StudentController {
+	
+	@Reference
+	private StudentServer stuServer ;
+	
+	@RequestMapping("rpcSerer")
+	public String rpcSerer() {
+		String result = stuServer.server("zs") ;
+		
+		return result ;//将结果显示在控制台
+		
+		
+		
+	}
+}
+
+
+	
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+	

@@ -1,0 +1,206 @@
+Mapper
+
+MP：MyBatisSqlSessionFactoryBean
+MaBtis：SqlSessionFactoryBean
+
+
+Mapper：是MaBtis的扩展：SqlSessionFactoryBean
+
+扫描 XxMapper接口所在的包  <!-- MyBatis只写接口 不写实现类:    com.yq.mapper.StudentMapper接口    
+ 
+
+mybatis/mp:
+   <bean id="configurer" class="org.mybatis.spring.mapper.MapperScannerConfigurer"  >
+        <property name="basePackage" value="com.yq.mapper" ></property>
+    </bean>
+
+Mapper：【tk】.mybatis.spring.mapper.MapperScannerConfigure
+
+
+回顾：mapper配置：
+和mybatis基本一致：唯一不同的   org->tk
+
+
+
+MP:
+public interface StudentMapper    extends baomidou.....BaseMapper<Student> {
+
+
+Mapper:
+public interface StudentMapper    extends Mapper<Student> {
+
+mapper的核心：
+	
+ Mapper父接口中 有很多细化的父接口（每个细化的父接口负责一件事情： x）
+
+
+
+
+
+1.org->tg
+2.继承 extends Mapper<Student> 
+
+
+
+主键：包装类Integer/ Long  ，不要使用基本类型
+
+
+Mapper:单表
+
+标识@id
+
+SELECT stu_no,stu_name,stu_age FROM tb_student 
+WHERE stu_no = ? 
+
+
+没有标识@id :默认 将全部字段作为联合主键
+SELECT stu_no,stu_name,stu_age FROM tb_student 
+WHERE stu_no = ? AND stu_name = ? 
+AND stu_age = ? 
+
+//MP 可以将主键值 会写到 对象中；mapper默认不会， 如果要： 配置
+    @Id()
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Integer stuNo ;//stuNo -> stu_no
+
+
+
+INSERT INTO tb_student ( stu_no,stu_name,stu_age ) VALUES( ?,?,? ) 
+
+插入数据时，如果不给主键赋值，是否回写？
+zs  23  -> 18,zs ,23
+1.mysql 或其他自带 “自增功能”的数据库：
+	    @Id()
+	 @GeneratedValue(strategy = GenerationType.IDENTITY)
+2.oracle不带自增：
+	    @Id()
+
+ 	   @KeySql(sql = "select SEQ_stu.nextval from dual", order = ORDER.BEFORE)
+下订单 ：   
+商品名字		架构		类别	..  -> 编号 	商品名字		架构		类别
+good.setName('xx')
+
+下订单 -> 返回商品列表 (goood.getId()编号 	 good.getName商品名字		架构		类别)
+
+    @Transient 表示该属性不会进行数据库持久化操作
+    private String other ;///other
+
+
+selectOne(stu)  。 stu:查询条件，类似于MP 中的wrapper
+
+
+selective
+INSERT INTO tb_student ( stu_no,stu_name ) VALUES( ?,? ) 
+
+
+没有selectvie
+INSERT INTO tb_student ( stu_no,stu_name,stu_age ) VALUES( ?,?,? ) 
+
+selective：对于没有操作的值，不进行任何处理
+没有selective：对于没有操作的值， 赋值为NULL
+。可以发现，selective在insert操作 基本没有区别.
+但对于修改，一般建议 加上selective
+
+
+1	ls	23
+1	zs	NULL
+
+
+zs->ls
+
+
+MyBatis  ：XxxMapper.xml  
+MP
+
+Mapper：
+
+entity  xxMapper.xml    xxMapper接口、
+
+
+通用mapper:  mybatis + 逆向工程XxByExample
+
+
+
+---
+Mapper二级缓存
+
+	
+MyBatis：SqlSession->studentMapper ->CRUD
+
+Mapper： 直接从容器里面拿
+
+默认支持一级缓存。
+
+二级缓存：  只要是同一个Names :	
+		StudentMapper.xml   --相当于 StudentMapper接口
+		namespace="com.yq.mapper.StudentMapper"
+
+Mapper开启二级缓存：
+		a.开启
+    <settings>
+
+        <!-- 开启二级缓存-->
+        <setting name="cacheEnabled" value="true"></setting>
+    </settings>
+		b.配置
+
+//开启二级缓存
+@CacheNamespace
+public interface StudentMapper    extends Mapper<Student> {
+
+    //add ->mapper.xml
+
+
+}
+
+
+二级缓存：会在日志中打印hit
+
+
+-------------
+
+
+
+需求： 自己定义一个方法 并使用
+
+
+思路： 学习Mapper如何实现(selectOne()  selectByPrimaryKey()  selectAl())
+
+
+
+selectOne()思路思路：
+接口	1.定义了接口SelectOneMapper
+		方法名T selectOne(T var1);
+		SQL语句B存在于BaseSelectProvider.class,
+
+
+类	2.BaseSelectProvider:
+	public String selectOne(MappedStatement ms) {
+       	 Class<?> entityClass = this.getEntityClass(ms);//Student
+       	 this.setResultType(ms, entityClass);
+       	 StringBuilder sql = new StringBuilder();
+       	 sql.append(SqlHelper.selectAllColumns(entityClass));//select * from Student where xx=xx
+       	 sql.append(SqlHelper.fromTable(entityClass, this.tableName(entityClass)));
+       	 sql.append(SqlHelper.whereAllIfColumns(entityClass, this.isNotEmpty()));
+       	 return sql.toString();
+   	 }
+
+
+
+SelectOneMapper和BaseSelectProvider中的方法名一直，但参数不一致
+
+
+
+
+
+
+		
+
+
+
+
+
+
+
+
+

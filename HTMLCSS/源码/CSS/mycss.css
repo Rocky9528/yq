@@ -1,0 +1,23 @@
+h1
+{
+
+	font-size : 20px ;
+}
+
+
+p{
+
+	color: blue ;
+}
+
+b{
+	color: yellow ;
+}
+
+.mystyle{
+	background-color: green ; 
+}
+
+#myh3{
+	background-color:yellow ;
+}

@@ -1,0 +1,45 @@
+字符串：
+	abcd  中国
+
+通用的理论：
+	对于非基本类型（对象类型|引用类型），
+		1 只定义，不new（实例化）：  默认值都是Null
+		Person per ;
+		String s3 ;
+
+		2.new实例化：  Xxx xx  =new Xxx();
+			xx值：不是null
+			xx内部的属性值 目前 全部是数据类型的默认值 ：
+
+		String s3 = new String();  s3:  ""
+
+		Person per = new Person();  per:  name是null  age是0
+		(String name,int age)
+
+
+String的定义：  public final class String
+
+		 final修饰的类 不能被继承 
+
+
+判断两个字符串内容是否相等
+
+
+如果用split拆分：拆分符正好在末尾，则 末尾的字符无法被统计。
+
+
+
+StringBuffer:String的增强版,比String最大的升级： 可以在 原来的内存空间中直接修改变量值
+
+
+String str = "a" ;
+for(int i=0;i<10000;i++)
+{	
+	str += i ;
+
+}
+
+
+
+
+

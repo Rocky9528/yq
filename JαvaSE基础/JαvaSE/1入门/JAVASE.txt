@@ -1,0 +1,106 @@
+JAVA基础：
+	1990 ,sun microsystems 开发的内部项目 oak ,1994改为名JAVA ,1995年推行
+	高级编程语言
+
+sun 2009被oracle收购（74亿美元）
+
+java三个版本：
+	J2SE：Standard Edition 基础班 ，核心 。结算系统、桌面游戏、桌面软件
+	J2ME：移动版  ；  （安卓也是Java语言开发的）安卓/ios
+
+	J2EE ：企业版。 大型系统、大型网站
+
+java1.1   1.2  1.3  1.4  
+java1.5 ，为了纪念重大升级：
+①
+	J2SE： java se
+	J2ME:  java me
+	J2EE:  java ee ->2018 Jakarta EE
+②java5 java6  java7 java 8 ..java 12
+
+
+oracle 2017 将J2EE共享了Eclipse基金会。
+Eclipse基金会2018年  ：J2EE -> Jakarta EE（雅加达）
+
+java 2018每6个月更新依次
+
+
+java是一个门跨平台语言：一次编写 处处运行
+
+java能够跨平台的原因，是因为有各种类型的jvm，且各个jvm不跨平台
+
+
+写代码(java) ->编译（class）->执行class
+
+jvm:java虚拟机  java virtual  machine
+
+jre:java运行环境，java runtime environment ，      jvm + 核心类库  :只能运行JAVA程序，但不能开发   
+jdk: jre+运行环境工具，java development kit  ：既能运行JAVA程序，又能开发
+
+
+jvm<jre<jdk
+
+开发人员需要下载并安装jdk
+
+jdk版本建议  jdk8u192及以前版本 （免费）
+
+oracle：2019.1月之后  jdk收费
+
+下载jdk：
+	 jdk8u192及以前版本 
+	 对于当前系统和位数 windows/linux/mac  32/64
+
+安装jdk：
+	注意：安装目录 只能又英文、数字 或下划线（.一般不建议）
+	其他都不能写，否则可能出现 ：汉字、特殊符号、空格
+	在安装jdk时，会自动提示安装jre(可选择)
+
+
+windows配置环境变量（大小写不区分）：
+	新建java_home：jdk的根目录  D:\Java\jdk1.8.0_71
+
+	path（必须）D:\Java\jdk1.8.0_71\bin  ；执行命令时，就会在path找相应的软件
+
+
+	新建（类路径）classpath:  .;D:\Java\jdk1.8.0_71\lib
+
+	两部分：自己写的. + 别人写的 （排序、安全、算法）
+
+
+验证：
+	cmd（win+r）
+	如果出现java -version 则说明配置成功
+java语言是区分大小写的
+	
+
+写第一个java代码：
+
+写代码(.java) ->编译（.class,字节码，相当于二进制，可以被计算机直接运行）->执行class
+
+
+
+编译命令javac
+	javac 文件名.java
+
+执行java
+	java 文件名
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

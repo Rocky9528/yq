@@ -1,0 +1,232 @@
+类和对象：
+类是抽象的，人
+对象是具体的，张三
+
+
+多个对象，可以抽象出 类
+类 可以产生多个对象
+
+物品，这个桌子
+类和对象的 组成部分：
+ 静态：属性（属性名，属性值）  ，身高 体重 年龄 ，颜色、  形状
+ 动态（功能）：方法  ，吃饭 睡觉     ， 支撑
+
+桌子：类
+这个桌子 ：对象
+
+类可以细分，但细分并不一定是对象。  例如  人：男人 女人
+
+int num = 10 ;
+String str = "zs"  ;
+
+类 对象  = new 类() ;
+public class Person{}
+
+
+Person zs = new Person() ;
+
+Person ls = new Person() ;
+
+Person ww = new Person() ;
+
+
+方法是多个对象共享的
+属性 是各个对象独有的
+
+
+
+Person  zs= new Person();
+一般而言，对象 是指堆中的东西....
+栈里面zs的 称为引用
+引用：相当于C语言的指针。持有对象的 内存地址
+
+
+
+但是 根据Everything is an Object
+
+属性：就是全局变量，
+全局变量：方法以外，类以内；  有初始值（数据类型的默认值 int 0）
+局部变量：方法内部 ;没有初始值，在使用前 必须赋初值
+
+局部变量可以和全局变量重名，并且局部变量优先级高
+
+
+new：实例化
+对象使用前必须先实例化/实例化（new）
+
+
+方法的调用的常见情况：
+同一个类中：
+	都有staitc，或都没static，或 没的调有的:直接调用有static，
+	=====有static  不能直接调用   没有static的方法====
+		static->static
+
+不在同一个类中：
+	万能方法：  new 对象，对象.方法() ;
+		          Person2 p = new Person2();
+      			  p.eatFruit();
+	调用的另一个方法必须是静态的：Person2.eatFruit(); //类名.方法()  其中的方法必须是static修饰的
+
+
+static方法 是 类级别的，属于类
+非static方法 是 对象级别，属于对象
+
+对象.static方法()   对象.非static方法()  
+		    类.static方法() 
+类有的，对象自然有；
+对象有的，类不一定有
+
+
+静态方法
+ public static void eatFruit(){...}
+
+非静态方法：
+ public void eatFruit(){...}
+
+
+
+方法：
+	动态、功能
+	类中
+	对象.方法（）
+	类名.static方法() ;
+
+	如果在同一个类中： class A{  a() ; b(); } ;
+	public void a()
+	{
+		b() ;
+	}
+
+
+
+返回值
+	有返回值		public int  a(){
+				return 1 ;
+			}
+
+			public String  a(){
+				return "zs" ;
+			}
+
+	public 返回值类型  方法名()
+	{
+		return 类型对应的数据 ;
+	}
+
+
+	无返回值（返回值为void）
+
+在调用有返回值的方法时，需要接收 String  xx = a1() ;
+
+
+main()
+{
+	....
+}
+	
+面向对象编程：类和对象、  将功能独立的写在方法中
+a()
+b()
+c()
+
+main()
+{
+	a();
+	c();
+}
+
+从键盘接收，计算三门课的平均成绩、总成绩
+
+
+有参 无参 ：
+	
+
+
+多个元素的类型相同->数组
+
+多个元素类型不同->  类/对象
+
+class Person
+{
+	String name;
+	int age ;
+	double height ; 
+}
+
+
+public void xx(参数列表)
+
+参数列表必须满足：类型、个数、顺序完全一致
+
+
+
+题目：有3个学生，每个学生有姓名、2门成绩； 计算每个学生的平均分、总分，
+
+
+并按总分降序输出（姓名、总分、平均分）。
+
+
+
+	int[] nums = new int[]{1,2,3} ;
+	String[] names = new String[]{"aa","bbb","ccc"} ;
+	类型[] 数组名 =new 类型[]{ 元素值,元素值,元素值} ;
+	Student[] students = new Student[]{ stu1,stu2,stu3  };   --对象数组
+
+
+
+
+           if(nums[i]>nums[i+1]){
+                   
+                   	int temp = nums[i] ;
+			nums[i]  = nums[i+1] ;
+			nums[i]  = temp ;
+                }
+
+
+
+
+
+用户
+
+猜拳游戏：
+对方角色：1张三 2李四  3王五  
+
+介绍出拳规则：1剪刀  2石头  3布选择
+
+出拳：2 、计算机随机出拳1
+
+每局完后，询问是否继续
+
+
+结束后，输出结果：赢了?输了？    一共几局、赢了几局、输了几局
+
+
+
+
+
+人： 身高 体重 姓名  ->基本类型
+
+人： 地址
+
+
+
+public class Address
+{
+	String homeAddress;
+	String schoolAddress ;
+
+}
+
+
+public class Person
+{
+	Address address ;
+}
+
+
+
+
+
+
+
+

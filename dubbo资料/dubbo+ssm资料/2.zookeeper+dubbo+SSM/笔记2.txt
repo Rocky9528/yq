@@ -1,0 +1,50 @@
+安装监听器（存在于dubbo-admin;而dubbo-admin又存在于incubator-dubbo-ops
+之中）
+
+因此要使用监听器，必须下载incubator-dubbo-ops，但是最新版的incubator-dubbo-ops是在spring boot中使用。
+
+如果要使用 旧的web版,则需要回退版本。但是陈旧版中 ，当前时间该版本 不完整（没有提供完整的maven依赖），因此无法使用。
+只能在 历史提交记录中 寻找一个可用的版本（Commits on May 18, 2018 ） 
+
+
+将下载好的dubbo-admin源代码 进行打包war，为了后续的运行。
+
+执行打包好的dubbo-admin的war包 ：在linux中的tomcat中运行 （将刚才的war放入  tomcat的webapps中即可0）
+
+		
+
+在maven中引入一个 mvn中央仓库中不存在的Jar：
+将jar自己安装到本地mvn仓库：
+mvn install:install-file -DgroupId=com.oracle -DartifactId=ojdbc7 -Dversion=10.2.0.5.0 -Dpackaging=jar -Dfile=d:\ojdbc7.jar  
+
+    <dependency>  
+        <groupId>com.oracle</groupId>  
+        <artifactId>ojdbc7</artifactId>  
+        <version>10.2.0.5.0</version>  
+    </dependency>  
+
+
+
+service依赖：dao、pojo、父工程 
+service启动、发布 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

@@ -1,0 +1,362 @@
+包：作用和 文件夹/目录一致
+
+包：package
+
+	1.将类等资源 进行结构化存储
+	2.避免重名问题
+
+
+命名： 一般 域名的翻转
+
+a.b.c
+
+com.tx.game
+
+
+打包：package hello.world;
+
+导包：import com.Computer;
+
+打包：如果多个类在同一个包中，通过package打包
+
+如果多个类 不在同一个包中，并且需要相互调用，就需要导包
+
+
+
+一般建议 对属性/方法 增加访问修饰符：
+priavte，私有的 ：只有当前类能够访问（同一个类） ；其他类不能直接访问，如果要访问，需要借助于访问器：setter、getter
+
+
+
+
+继承：减少冗余（重复）
+如果很多类的属性、方法 重复出现，重复--L继承
+
+严格继承：
+is  a
+是一个
+
+子类 是一个 父类
+
+dog  是一个 pet
+
+penguin 是一个 pet
+
+注意
+：如果一个方法  ，方法名相同，但方法体不同，也不能提取到父类
+只有完全相同的属性、方法,能提取到父类
+
+
+总结：
+	a()   this.a()  :当前类a()，如果没  去父类找a();
+	super.a():直接去父类中找a()
+this：当前类
+super：父类
+this/super：构造方法 。this()调用本类构造 ；super()调用父类构造
+如果在构造方法中 通过this(..)/super()调用其他的构造方法，则 this()/super()必须放在第一行。
+
+
+构造方法：
+	无参构造方法：
+	public 类名(){
+
+	}
+
+如果类中 没有任何构造方法，则系统自动提供一个 无参构造。
+public Dog(){}
+
+如果 类中 已经存在了任何构造方法，则系统不再提供无参构造
+
+一般建议：如果给类中 编写构造方法，则手动编写一个无参构造  防止报错	
+
+含参构造方法的作用：
+
+1.实例化（产生对象）
+Dog dog = new Dog();
+
+2.一次性给多个属性赋值
+
+
+多个构造方法之间 不能循环调用
+
+
+
+子类继承父类：  private 、构造方法 是不能被继承的。但是 子类可以显示的调用父类构造super
+
+
+
+private:本类。属性
+
+public:全部。方法
+
+
+protected：
+子类引用父类的protected属性:
+1.不要new，子类直接使用父类属性 
+2.new：static
+
+静态代码块: 第一次执行。永远只执行一次  。初始化（人机猜拳  ：人  计算）
+
+普通代码块:  在每次执行无参构造之前执行
+
+new Xxx():经历了以下过程
+父类static...
+子类static...
+父类普通代码块...
+父类无参..
+子类普通代码块...
+子类无参...
+
+方法重载、方法重写：看图
+
+构造方法能否被重写？不能！
+
+
+private String name;
+public String getName(){...}
+
+public void setName(){...}
+
+特殊：boolean类型的属性 获取方法：getXxx()/isXxx();
+private boolean sex ;
+
+public String isSex(){...}
+public String getSex(){...}
+
+public void setSex (){...}
+
+
+
+
+
+
+1.多个子类中拥有相同的方法：将其提取到父类中，再继承即可
+2.多个子类的方法 各不相同：各自处理，不要放父类中放
+3.多个子类的方法  方法标签相同；但方法体不同   :抽象方法
+标签：public void print()
+{
+	...
+}
+
+抽象类：
+	抽象方法：abstract ，没有方法体
+
+	抽象方法必须包含在抽象类中
+	抽象类中，并不一定包含抽象方法
+
+class   abstract  X
+{
+
+	public  abstract void a();
+}
+
+	抽象类不能实例化（new X()），原因：抽象类中可能存在抽象方法，而抽象方法没有方法体
+	
+
+
+
+final:最终（不能再改了）
+	final修饰的类 ：不能被继承
+	final修饰的方法：不能被重写
+	final修饰的变量、属性：不能被修改
+
+
+override：重写
+overload：重载
+	
+	多态：歧义  ，一个词语 必须根据上下文才有实际的含义
+
+	打：打篮球  打水  打架
+
+
+喂
+
+		Pet pet = new Dog();//多态
+		Pet pet = new Penguin();
+
+		
+		double d = 10 ;  //大范围类型 = 小范围类型
+		double = int ;
+
+	父类 引用对象名字 = new 子类();
+	多态：父类引用指向子类对象；引用在栈空间中，子类对象在堆空间中
+
+
+步骤：
+	父类Pet   ,eat()
+	子类，子类重写父类的方法Dog ,eat(){,.,,}   --》多态时使用的方法，必须同时出现在父类、子类（重写） 
+
+
+
+	运行时，父类 引用对象名字 = new 子类();  
+		Pet pet = new Dog();
+		pet.feed(dog);
+
+也就是说：父类引用 不能指向 子类独有的方法
+
+多态的几种实现方法：歧义
+	1.方法重载add
+		public int add(int num1,int num2){ return num1+num2 ;}
+
+		public double add(double num1,double num2,double num3){ return num1+num2+num3 ;}
+
+	add(1,2) ;
+	2.方法重写
+	class Father{
+		public void eat(){吃素...}
+	}
+
+	class Son extends Father
+	{
+		public void eat(){吃肉...}
+	}
+
+
+Father father = new Father（）；
+father.eat()
+	3.使用父类作为方法的形参
+	4.使用父类作为方法的返回值
+		
+	
+多态时：父类和子类之间的转换
+	double d = 10 ;  // double = int ;
+	1.从小到大 ，自动转换
+	Pet pet =new Dog();
+	2.从大到小，强制转换
+	int num = (int)12.3 ; //int = (int)double ;
+	Dog dog =  (Dog)( new Pet());
+
+
+对象 instanceof  类型
+
+接口：
+	普通类：class 类 ：底层员工
+	抽象类abstract class 类 ：中层
+	接口 ：高层
+
+
+
+普通类：
+public class Person
+{
+	public void eat()
+	{
+		...........
+	}
+	sleep(){...........}
+	
+}
+
+抽象类：
+
+
+public abstarct class Person
+{
+	public void eat()
+	{
+		...........
+	}
+	public abstract void sleep();
+	
+}
+
+接口：interface
+public interface Person
+
+{
+	//1.属性全部是static final类型的
+	//2.全部是public abstract
+	public abstract void eat();
+	public abstract void sleep();
+}
+	
+
+抽象方法：相当于一种约定：
+public abstract void eat();
+
+
+接口比抽象类 更进一步的“抽象”
+
+
+继承：
+	is a
+狗是一个宠物
+
+接口：代表了一种能力、一种约定
+	类	has a	接口
+门 有 锁的功能  
+
+
+
+接口和抽象类一样，不能实例化(new)
+
+
+
+父类eat(); ->子类
+接口eat() ->实现类 
+
+继承：类
+实现：接口
+A extends B{}
+A implements C{}
+
+
+防盗门：
+	分层
+	高级 、入门
+	高级：接口public abstract void eat() ;
+	入门：public  void eat() {.........}
+
+
+防盗门：
+	开门，关门
+	开锁，关锁
+
+防盗门是门： 继承
+放到门有锁的功能： 接口
+ThefrProofDoor 
+
+
+子类必须重写父类中的所有抽象方法
+实现类必须实现接口中的 抽象方法
+
+java中单继承、多实现
+
+
+打印机鼻祖：
+	墨盒：彩色 、黑色
+	纸张：A4  B
+
+
+
+实现类：真正制作打印机的厂商
+
+
+接口：约定
+
+
+类：单继承
+
+接口： 接口之间可以相互继承，多继承
+接口也可以实现多态
+
+
+        //接口 = 实现类
+        //父类 = 子类
+
+接口中不存在构造方法：
+Person person = new Person();
+
+
+
+
+
+
+
+
+
+
+
+
+
+

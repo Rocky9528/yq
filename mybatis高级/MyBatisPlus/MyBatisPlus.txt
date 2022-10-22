@@ -1,0 +1,316 @@
+MyBatisPLus
+
+
+ORM（hibernate mybatis  jpa）：数据 student(no,name)    对象Student(StudentNO,studentName)
+
+MyBatis   +MyBatisPLus   : 只做增强，不做改变
+
+
+前置课程：maven + Spring  +mybatis 
+
+
+开发MyBatis Plus:
+	1.jar
+	2.数据表		类
+	student  	Student
+	3. MyBatis配置文件： mybatis.xml （没有具体配置信息，因为会放入到SPring中配置）
+	4.日志 log4j.xml
+	5.数据库的连接信息
+	6.Spring配置文件
+	
+spring boot:自动管理版本 
+
+spring:版本手工   mybatis - plus	
+
+
+切换到 MyBatis-PLus
+
+ <bean  id="sqlSessionFactoryBean"  class="com.baomidou.mybatisplus.extension.spring.MybatisSqlSessionFactoryBean"  >
+         
+CRUD操作
+JDBC: Dao接口  Dao实现类
+MyBatis:  Mapper接口- SQL映射文件  
+
+MyBatis-PLus :  Mapper接口 
+
+
+接口   extends BaseMapper<Student>   ，之后无需编写 SQL映射文件
+
+
+
+
+类名		表名   ：@TableName("tb_student")
+对象的 属性  -  表的字段  一一对应关系：@TableId、@TableField
+
+
+注意：
+	属性stuName ->字段stuName   ：自动转换
+
+映射：
+	<!-- 禁止自动转换-->
+    <settings>
+        <setting name="mapUnderscoreToCamelCase" value="false"/>
+        <setting name="logImpl" value="LOG4J"/>
+    </settings>
+
+
+   @TableField(value="stuname")
+    private String stuName ; //stuName ->stu_name
+
+一般建议：
+	类的是属性： stuName ;
+	表的字段：  stu_name 
+
+
+MyBatis-plus:  1.更换成MybatisSqlSessionFactoryBean     
+	2.继承一个父接口 extends BaseMapper<Student>，之后就可以使用该接口中 已经存在的CRUD方法
+	3.操作 。   通过注解 将 表（字段） - 类（属性）
+
+
+
+.ge("stu_age",25).le(   "stu_age",28)  默认是and关系
+
+
+.ge("stu_age",25).
+.or()
+.le(   "stu_age",28) 
+
+
+
+
+
+.ge("stu_age",25).
+.or(
+i->
+i.le(   "stu_age",28) 
+.le(   "stu_age",28) 
+)
+
+
+
+
+MP：  where语句：Warpper实现  ， QueryWarpper(查询)    UpdateWrapper（DML）
+
+
+
+源码：MP 
+
+
+
+回顾：
+MappedStatement对象 就是  <select>等标签
+MyBatis/MP都是通过  MappedStatement对象来指向增删改
+
+
+预加载：MP启动时，会指定加载所有常见的 CRUD语句 （来自于MP提供的BaseMapper接口），并将这些语句封装到了MappedStatement对象中。
+
+
+AR:  activeRecoder ,形式 ：通过实体类Student直接进行增删改查操作（不需要借助于Mapper对象）
+
+1.继承Model类即可
+	public class Student extends  Model<Student> 
+
+      new ClassPathXmlApplicationContext("applicationContext.xml");
+        Student student = new Student("张思33",33);
+        student.insert() ;//增加->数据库
+注意：使用时 必须先加载IOC容器，目的 是为了让AR知道 要操作的是数据库在哪里
+
+
+MP将主键设置为了Serializable，类型。目的 ：可以接受常见的类型：8个基本类型+String  ->Serializable
+
+
+面向对象查询方式：  查询的对象是“类的 属性”
+        wrapper.lambda().like(Student::getStuName, "a");//like stu_name like '%a%'
+
+面向SQL查询方式：
+		查询的对象是“表的 字段”
+  wrapper.like(   "stu_name" ,"a"  ); //like '%a%'
+
+
+
+逆向工程（代码生成器）
+MyBatis:
+student表->Student类、Mapper接口、mapper.xml
+
+MyBatis Plus:
+student表->Student类、Mapper接口、mapper.xml、Service、Controller
+
+区别：
+	MyBatis: 模版配置文件
+	MyBatis Plus:类
+
+参照官网
+	
+
+
+lombok：可以给类的属性生成set  get 构造方法等
+1.依赖
+2.配置
+
+
+
+分页：复习
+
+ <select>等标签 -> MappedStatement对象
+boundSql ：将我们写的SQL 和 参数值进行了拼接后的对象，即最终能被真正执行的SQL
+拦截器：编写拦截器、注入拦截器，   放入  <plugins>即可。 作用：对SQL进行“修改”
+
+分页：
+	MyBatis Plus 
+
+
+   <property name="plugins" >
+                <list>
+                        <!-- 分页插件-->
+                        <bean class="com.baomidou.mybatisplus.extension.plugins.PaginationInterceptor"></bean>
+                         <!-- 性能优化
+                        <bean></bean>
+                        -->
+                </list>
+            </property>
+
+
+
+分析分页源码：
+
+	select *from xxx 
+		->PaginationInterceptor
+	select *from xxx   LIMIT 2,2 
+
+
+
+
+
+攻击 SQL 阻断解析器:
+	作用:阻止恶意（或者失误）的全表更新删除:
+delete from student ;
+update set stu_name = 'xx' ;
+	
+
+性能分析插件:
+	SQL语句（foramat）、其执行时间 （真实的时间，最大时间）	
+
+
+
+
+
+
+ UPDATE tb_student 
+    SET stu_name=?, stu_age=? 
+    where》。
+
+该插件只用于开发环境 （写代码，调试），
+
+生产环境:  最终部署，交付给使用人员
+
+性能测试： 开发使用，部署关闭
+
+
+
+MP:
+1.mybatis:	studentMapper.xml	
+		<select id="queryStudent">
+				select * from xxx 
+		</select>
+
+		
+
+
+2.mybatis:	@Select("select....")
+3.MP:		extends BaseMapper<Student> 
+4.MP:	自己写SQL。Sql 注入器	  ，仿照方式“3” 自己编写一个 带SQL的方法 
+	deleteAllStudents();
+
+a.自定义方法 ->写sql语句 + 标签名 MyDelete  extends AbstractMethod
+b.自定义Sql 注入器 ： 包含原来17个 + 自己的MyDelete
+c.配置 告知MP,以后使用自定义注入器
+
+
+
+
+逻辑删除（假删除）：
+@TableLogic
+private Integer deleted;  
+在表中增加相应字段
+逻辑删除：为了数据安全
+
+
+全局配置：  以 表名加前缀位置
+
+
+            <property name="dbConfig" >
+                <bean class="com.baomidou.mybatisplus.core.config.GlobalConfig$DbConfig">
+                    <property name="logicDeleteValue" value="1"></property>
+                    <property name="logicNotDeleteValue" value="0"></property>
+
+
+                    <property name="tablePrefix" value="tb_"></property>
+
+
+
+                </bean>
+
+@TableName(value="student",keepGlobalPrefix=true)
+	
+
+介绍：银行 社交  - 架构 -  （自己做的模块、  n技术细节  ）
+	
+
+
+自动填充
+https://mp.baomidou.com/guide/auto-fill-metainfo.html
+
+
+meta：元数据 （描述数据的数据）
+
+
+
+
+
+id  stuname  age
+
+
+
+1    ls       24
+
+
+
+
+crud
+
+增
+
+改
+
+
+
+
+
+实现oracle自增（序列）
+a. jar
+oracle.jar ->mvn本地仓库形式
+
+
+2个mvn仓库：C:\Users\YANQUN\.m2\repository 	
+   环境变量（默认）D:/mvnrep
+
+以下命令 默认识别的是 环境变量中配置的mvn库
+
+mvn install:install-file -DgroupId=ojdbc -DartifactId=ojdbc7 -Dversion=7.0.0.1 -Dpackaging=jar -Dfile=ojdbc7.jar
+
+b.配置
+
+
+mybatis : 接口  mapper.xml
+
+ 接口 ->mapper.xml结构
+
+void insert()   ->     <insert id= insert"">
+			
+			</>
+
+
+
+	
+
+	

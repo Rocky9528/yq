@@ -1,0 +1,243 @@
+swagger: "2.0"
+info:
+  description:  学校活动
+  version: "1.0.0"
+  title: API-活动
+host: api.yanqun.com
+basePath: /yq
+paths:
+  /activity:
+    post:
+      summary: 增加活动
+      parameters:
+      - in: body
+        name: body
+        description: 活动对象
+        required: true
+        schema:
+          $ref: "#/definitions/Activity"
+      responses:
+        200:
+          description: success
+          schema:
+            $ref: '#/definitions/ApiResponse'
+    get:
+      summary: 全部列表
+      responses:
+        200:
+          description: success
+          schema: 
+            $ref: '#/definitions/ApiActivityListResponse'
+  /activity/{activityId}:
+    get:
+      summary: 查询某个活动
+      parameters:
+        - name: activityId
+          in: path
+          description: ActivityID
+          required: true
+          type: string
+      responses:
+        200:
+          description: success
+          schema:
+            $ref: '#/definitions/ApiActivityResponse'
+    put:
+      summary: 修改活动
+      parameters:
+        - name: activityId
+          in: path
+          description: 活动编号
+          required: true
+          type: string
+        - name: body
+          in: body
+          description: 活动对象
+          required: true
+          schema:
+            $ref: "#/definitions/Activity"
+      responses:
+        200:
+          description: success
+          schema:
+            $ref: '#/definitions/ApiResponse'
+    delete:
+      summary: 删除活动
+      parameters:
+        - name: activityId
+          in: path
+          description: 活动编号
+          required: true
+          type: string
+      responses:
+        200:
+          description: success
+          schema:
+            $ref: '#/definitions/ApiResponse'
+  /activity/queryActivitiesByPage:
+    post:
+      summary: 根据条件查询活动列表 
+      parameters:
+        - name: body
+          in: body
+          description: 活动对象
+          required: true
+          schema:
+            $ref: '#/definitions/Activity'
+      responses:
+        200:
+          description: success
+          schema:
+            $ref: '#/definitions/ApiActivityListResponse'
+  /activity/queryActivitiesByPage/{currentPage}/{pageSize}:
+    post:
+      summary: 活动分页
+      parameters:
+        - name: page
+          in: path
+          description: 页码
+          required: true
+          type: integer
+          format: int32
+        - name: size
+          in: path
+          description: 页大小
+          required: true
+          type: integer
+          format: int32
+        - name: body
+          in: body
+          description: 查询条件
+          required: true
+          schema:
+            $ref: "#/definitions/Activity"
+      responses:
+        200:
+          description: 查询success
+          schema:
+            $ref: '#/definitions/ApiActivityPageResponse'
+  /activity/school/{school}/{currentPage}/{pageSize}:
+    get:
+      summary: 根据学校显示分页内容
+      parameters:
+        - name: page
+          in: path
+          description: 页码
+          required: true
+          type: integer
+          format: int32
+        - name: size
+          in: path
+          description: 页大小
+          required: true
+          type: integer
+          format: int32
+        - name: school
+          in: path
+          description: 学校
+          required: true
+          type: string
+      responses:
+        200:
+          description: 查询success
+          schema:
+            $ref: '#/definitions/ApiActivityPageResponse'
+definitions:
+  Activity:
+    type: "object"
+    properties:
+      id:
+        type: "string"        
+        description: "编号"
+      name:
+        type: "string"        
+        description: "活动名称"
+      summary:
+        type: "string"        
+        description: "大会简介"
+      detail:
+        type: "string"        
+        description: "详细说明"
+      sponsor:
+        type: "string"        
+        description: "主办方"
+      image:
+        type: "string"        
+        description: "活动图片"
+      starttime:
+        type: "string"
+        description: "开始时间"
+        format: "date"
+      endtime:
+        type: "string"        
+        description: "截止时间"
+        format: "date"
+      address:
+        type: "string"        
+        description: "举办地点"
+      enrolltime:
+        type: "string"        
+        description: "报名截止"
+        format: "date"
+      state:
+        type: "string"        
+        description: "是否可见"
+      school:
+        type: "string"        
+        description: "学校"
+
+  ActivityList:
+    type: "array"
+    items: 
+      $ref: '#/definitions/Activity'
+  ApiResponse:
+    type: "object"
+    properties:
+      code:
+        type: "integer"
+        format: "int32"
+      flag:
+        type: "boolean"
+      message:
+        type: "string"
+  ApiActivityResponse:
+    type: "object"
+    properties:
+      code:
+        type: "integer"
+        format: "int32"
+      flag:
+        type: "boolean"
+      message:
+        type: "string"
+      data:
+        $ref: '#/definitions/Activity'
+  ApiActivityListResponse:
+    type: "object"
+    properties:
+      code:
+        type: "integer"
+        format: "int32"
+      flag:
+        type: "boolean"
+      message:
+        type: "string"
+      data:
+        $ref: '#/definitions/ActivityList'
+  ApiActivityPageResponse:
+    type: "object"
+    properties:
+      code:
+        type: "integer"
+        format: "int32"
+      flag:
+        type: "boolean"
+      message:
+        type: "string"
+      data:
+        properties:
+          total:
+            type: "integer"
+            format: "int32"
+          rows:
+            $ref: '#/definitions/ActivityList'

@@ -1,0 +1,248 @@
+<html>
+	<head>
+		<meta charset="UTF-8">
+		<title>动画</title>
+		<style>
+			li{
+				list-style: none;
+				width: 80px;
+				line-height: 40px;
+				background: rgba(111, 222, 333, 0.8);
+				border-radius: 6px;
+				font-size: 16px;
+			}
+			
+			li a{
+				text-decoration: none;
+				color: #fff;
+				display: block;
+				text-align: center;
+				height: 40px;
+				
+			}
+			li a:hover{
+				background: rgba(333, 222,111, 0.8);
+				border-radius: 6px;
+				/*最新版
+				 transform: translate(20px,20px) ;*/
+				 /*为了兼容 中间某些过渡版本
+				 -webkit-transform: translate(20px,20px) ;*/
+				
+				
+				/*	transform: translateX(20px) ;
+					transform: translateY(20px) ; 
+					
+				 transform:scale(2,2);
+				  transform:scaleX(2);
+				  transform:scaleY(2);
+				
+				transform: translate(50px,50px) scale(2,2);*/
+				
+				transform: rotate(-70deg);
+				
+				 
+			}
+			
+			div img:nth-child(even)
+			{
+				width:200px ;
+			
+			}
+						
+			div img:nth-child(odd)
+			{
+				width:300px ;
+				
+			}
+			
+			.box
+			{
+				width:960px ;
+				margin:200px auto ;
+				position:relative ;
+				
+				
+			}
+			
+			div img
+			{
+				border:2px solid #ddd ;
+				padding:10px;
+				background:#fff ;
+				position:absolute ;
+				
+			}
+			/*id选择器 >标签选择器*/
+			#box img:hover
+			{
+				box-shadow: 5px 5px 55px #ddd ;
+				transform: rotate(2deg) scale(1.5) ;
+			}
+			
+			
+
+			div img:nth-child(1){
+			
+				
+				left:0px ;
+				top:10px ;
+				transform: rotate(-15deg) ;
+			}
+			div img:nth-child(2){
+				
+				left:-50px ;
+				top:600px ;
+				transform: rotate(-20deg) ;
+			}			
+			div img:nth-child(3){
+				
+				right:0;
+				bottm:0 ;
+				transform: rotate(15deg) ;
+			}				
+			div img:nth-child(4){
+				
+				left:0 ;
+				bottm:450px ;
+				transform: rotate(-20deg) ;
+			}	
+
+			div img:nth-child(5){
+				
+				bottom:-766 ;
+				left:400 ;
+				transform: rotate(-30deg) ;
+			}	
+
+			div img:nth-child(6){
+				
+				left:200px ;
+				top:326px ;
+				transform: rotate(20deg) ;
+			}	
+
+			div img:nth-child(7){
+			
+				left:700px ;
+				top:0px ;
+				transform: rotate(220deg) ;
+			}	
+			
+			div img:nth-child(8){
+				
+				bottom:-20px ;
+				right:500px ;
+				transform: rotate(30deg) ;
+			}	
+
+			div img:nth-child(9){
+				
+				left:550px ;
+				top:90px ;
+				transform: rotate(150deg) ;
+			}	
+
+			div img:nth-child(10){
+				
+				left:180px ;
+				top:20px ;
+				transform: rotate(-10deg) ;
+			}	
+
+			#transition
+			{
+				background:red ;
+				width:200px;
+				height:200px;
+				/*第三个参数：过渡的速度：
+					ease :由快到慢
+					linear: 匀速
+					ease-in:越来越快
+					ease-out:越来越慢
+					ease-in-out:先加速后加速
+					
+				第四个参数： 延迟时间
+				
+				*/
+				transition: width 5s ease-out  -3s ;
+				
+			}
+			
+			#transition:hover
+			{
+				background:yellow ;
+				width:400px;
+			}
+			
+			#mybox img
+			{
+				
+				
+			}
+			
+			#mybox .ico:hover
+			{
+				transform:rotate(360deg) scale(1.5)
+			}
+			
+		</style>
+	</head>
+<body>
+
+
+	<div id="mybox">
+		<img class="ico" src="imgs/1.jpg"  width="50px" height="50px"/>
+	</div>
+	
+	<br/>
+	<br/>
+	<br/>
+	<br/>
+	<br/>
+	<br/>
+	<br/>
+	
+	<div id="transition">
+	
+	</div>
+	
+	
+
+
+    <ul>
+        <li><a href="#">动画</a></li>
+    </ul>
+	
+	
+	
+	
+	<br/>
+	<br/>
+	<br/>
+	<br/>
+	<br/>
+	<br/>
+	<br/>
+	
+	
+	
+	
+
+	<div class="box" id="box">
+		<img src="imgs/1.jpg" />
+		<img src="imgs/2.jpg" />
+		<img src="imgs/3.jpg" />
+		<img src="imgs/4.jpg" />
+		<img src="imgs/5.jpg" />
+		<img src="imgs/6.jpg" />
+		<img src="imgs/7.jpg" />
+		<img src="imgs/8.jpg" />
+		<img src="imgs/9.jpg" />
+		<img src="imgs/10.jpg" />
+		
+	
+	</div>
+	
+	
+</body>
+</html>

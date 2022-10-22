@@ -1,0 +1,468 @@
+1.数据库环境切换 （驱动jar）
+	a.切换 environment （指定实际使用的数据库）
+	b.配置 Provider别名
+	c.写不同数据库的SQL语句
+	d.在mappe.xml中配置databaseId="Provider别名"
+
+如果mapper.xml的 sql标签 仅有 一个 不带databaseId的标签，则改标签 会自动适应当前数据库。
+ 如果 既有不带databaseId的标签，又有带databaseId的标签,则程序会优先使用带databaseId的标签
+
+
+2.注解方式
+	推荐使用xml
+	a.将sql语句写在接口的方法上@Select("") ;
+	b.将接口的全类名 写入<mapper>，让mybatis知道sql语句此时是存储在接口中
+注解/xml都支持批量引入，
+    <mappers>
+	<!--以下可以将com.yanqun.mapper 包中的注解接口 和 xml全部一次性引入 -->
+          <package name="com.yanqun.mapper" />
+      </mappers>
+
+3.增删改的返回值问题
+	返回值可以是void、Integer、Long、Boolean
+	如何操作：只需要在接口中 修改返回值即可
+
+4.事务自动提交
+	手动提交：
+ sessionFactory.openSession();
+ session.commit();
+	自动提交：每个dml语句 自动提交
+	sessionFactory.openSession(true);
+
+5.自增问题
+	mysql支持自增
+只需要配置两个属性即可：
+useGeneratedKeys="true" keyProperty="stuNo"
+
+    <insert id="addStudent"
+            parameterType="com.yanqun.entity.Student"  databaseId="mysql" useGeneratedKeys="true" keyProperty="stuNo">
+          insert into student(stuName,stuAge,graName)
+          values(#{stuName},#{stuAge},#{graName})
+ </insert>
+
+
+create table student
+(
+   stuno int(4) primary key auto_increment,
+   stuname varchar(10),
+   stuage int(4),
+   graname varchar(10)
+);
+
+
+	oracle不支持自增 ：通过序列模拟实现
+	方式一：before（推荐）
+	create sequence myseq
+		increment by 1 
+		start with 1;
+通过  <insert>的字标签 <selectKey>实现：
+	在 <selectKey>中查询下一个序列（自增后的值），再将此值传入keyProperty="stuNo"属性，最后在真正执行时 使用该属性值。
+	方式二：after
+
+序列自带的两个属性：
+nextval：序列中下一个值
+currval: 当前值
+
+insert into student values(myseq.nextval,'zs1',23,'a1');
+insert into student values(myseq.nextval,'zs2',24,'a2');
+insert into student values(myseq.nextval,'zs3',25,'a3');
+insert into student values(myseq.nextval,'zs4',26,'a4');
+insert into student values(myseq.nextval,'zs5',27,'a5');
+
+6.参数问题
+	目前 将多个参数封装到一个javabean对象（pojo）,然后使用该对象传递
+	a.传入多个参数时，不用在mapper.xml中编写parameterType
+		异常提示：
+	stuNo不能使用。可以使用的是： [arg3, arg2, arg1, arg0, param3, param4, param1, param2]
+
+    <insert ...>
+        insert into student(stuno,stuName,stuAge,graName)
+        values(#{arg0} , #{arg1},#{arg2},#{arg3})
+    </insert>
+
+	b.命名参数
+		可以在接口中通过@Param("sNo") 指定sql中参数的名字
+	 public abstract Integer addStudent(@Param("sNo") Integer stuNo,
+
+	    <insert...>
+      	  insert into student(stuno,...)
+       	 values(#{sNo}, ...)
+   		 </insert>
+
+	c.综合使用
+	Integer addStudent(@Param("sNo")Integer stuNo, @Param("stu")Student student);
+	
+
+	    <insert id="addStudent"  databaseId="oracle">
+       	 insert into student(stuno,stuName,stuAge,graName)
+       	 values(#{sNo} , #{stu.stuName},#{stu.stuAge},#{stu.graName})
+    </insert>
+
+
+7. 增加null
+
+oracle:  如果插入的字段是Null, 提示错误： Other 而不是null
+
+mysql：如果插入的字段是Null, 可以正常执行（没有约束）
+
+原因：
+	各个数据库 在mybatis中 对各种数据类型的 默认值不一致。
+	mybatis中，jdbcTypeForNull（如果是null） ，则默认值OTHER。Other来说，MySQL能够处理（NULL）,但是Oracle不行。
+
+解决：
+	oracle：  null  ->OTHER  ,需要手工告诉oracle  :other ->null
+	a.修改具体的sql标签
+	 当 某个数据类型oracle无法处理时，告诉它用默认值null；注意，此时设置的jdbcType=NULL不会影响正常的赋值（“zs”）
+    <insert id="addStudent"  databaseId="oracle">
+        insert into student(stuno,stuName)
+        values(#{stuNo} , #{stuName,jdbcType=NULL}) 
+    </insert>
+	b.配置 mybatis全局配置文件conf.xml
+    <settings>
+        <setting name="jdbcTypeForNull" value="NULL"/>
+    </settings>
+		
+null ->jdbcTypeForNull  -> NULL
+
+
+8.返回值为HashMap的情况
+	<select id="queryStudentOutByHashMap"   parameterType="int"
+            resultType="HashMap">
+         select stuNo "no",stuName "name",stuAge "age"
+        from student  where stuNo = #{stuNo}
+    </select>
+
+  select stuNo "no" ...
+其中 stuNo是数据库的字段名。
+“no”是stuNo的别名，用于 在map中 get值时使用(作为map的key)。  map.get("no" );
+	
+如果不加别名，则map的key就是  字段名
+	<select id="queryStudentOutByHashMap"   parameterType="int"
+            resultType="HashMap">
+         select stuNo,stuName,stuAge 
+        from student  where stuNo = #{stuNo}
+    </select>
+
+思考：
+	STUNAME：xx007	STUAGE：77	STUNO：11	
+
+      STUNAME
+33	zs	22	
+34	ls	22	
+45	ww	33		
+87	zl	69	
+
+
+map:  
+	key:STUNO	value:Student
+
+	程序根据select的返回值 知道map的value就是 Student ,根据  @MapKey("stuNo")知道 Map的key是stuNo
+    @MapKey("STUNO")  //oracle的元数据（字段名、表名 ）都是大写
+    HashMap<Integer,Student> queryStudentsByHashMap();
+	
+    <select id="queryStudentsByHashMap"
+            resultType="HashMap">
+         select stuNo ,stuName ,stuAge  from student
+    </select>
+
+
+
+9.ResultMap ： 字段 和 属性名 的对应关系
+
+alter table student rename column stuno to sno;
+alter table student rename column stuname to sname;
+alter table student rename column stuage to sage;
+alter table student rename column graname to gname;
+
+字段名  属性名
+sno   - stuNo
+
+
+alter table student add constraint pk_student3 primary key(sno);
+
+
+在resultMap中 还可以使用鉴别器：对相同sql中不同字段值进行判断，从而进行不同的 处理。
+
+10.别名问题
+	如果在批量设置别名时，出现了冲突。可以使用@Alias("myStudent")区分。
+	
+
+
+11. SQL标签
+<where>可以处理拼接sql中 【开头】第一个and
+
+<trim>可以处理拼接sql中 【开头或结尾】第一个and
+	开头：
+		 <trim prefix="where" prefixOverrides="and">
+		给拼接的SQL加prefix="where" 
+		prefixOverrides="and"，处理拼接SQL中【开头】第一个and
+
+		suffixOverrides="and"，处理拼接SQL中【结尾】最后一个and
+
+ select * from student where stuname like '%s%' and stuage = 23 and graname like '%b%' ;
+
+		prefix	： 拼接
+		prefixOverrides：删除
+
+
+12.内置参数
+	_parameter:  代表mybatis的输入参数。
+
+		
+	_databaseId: 代表当前数据库的 名字
+
+
+
+13.模糊
+	a.      ${}  ：原样输出
+			 stuName like '%${stuName}%'
+
+
+	b.传值时，直接传 
+
+		student.setStuName("%s%");  
+		stuName like #{stuName}
+
+	c.bind参数
+	   <bind name="_queryName" value="'%'+stuName+'%'"/>
+	通过bind将传入的stuName进行了处理（增加了%...%）
+
+
+逆向工程的使用
+	1. jar
+	2. xml模板文件（修改生成路径、表名）
+	3. 根据java模板类 一键生成
+根据学生表 ->学生类、学生Mapper接口、studentMapper.xml
+
+
+	4.如何使用
+		增加 mybatis配置文件 conf.xml
+
+	对于like模糊查询，逆向工程需要在传值时 写入%x%
+	
+14.MyBatis架构和源码解析
+	MyBatis中步骤
+	a.获取SqlSessionFactory对象
+	b.获取SqlSession对象
+	c.获取XxxMapper对象（代理接口中的方法、mapper.xml中的<select>等标签）
+	d.执行<select>等标签中定义的SQL语句
+
+a.获取SqlSessionFactory对象
+	
+parser解析器
+通过parseConfiguration()在configuration标签 设置了 properties、settings、	environments等属性标签
+	将所有的配置信息 放在了Configuration对象中	
+	解析所有的XxxMapper.xml文件（分析其中的 增删改查标签）
+	<select id="" resultType=" 等属性 是通过 parseStatementNode()解析的> 
+	会将XxxMapper.xml中的 <select>等标签解析成 MappedStatement对象
+	====即  MappedStatement对 就是  <select>等标签
+
+MappedStatement ->存在于Configuration中
+environment ->存在于Configuration中
+
+======所有的配置信息、增删改标签 全部存在于Configuration中 ->
+	
+Configuration又存在于DefaultSqlSessionFactory对象中（SqlSessionFactory）
+->
+
+SqlSessionFactory对象 ->DefaultSqlSessionFactory ->Configuration ->包含了一切配置信息
+
+
+b.获取SqlSession对象
+
+	configuration.newExecutor(tx, execType) ->SimpleExecutor
+根据不同的类型execType，产生不同的Executor,并且会对执行器进行拦截操作：
+	executor = (Executor) interceptorChain.pluginAll(executor);
+通过装饰模式，将刚才产生的executor 包装成一个更加强大的 executor。
+作用：以后 如果我们要给MyBatis写自己的插件， 就可以通过拦截器实现。
+插件开发：  1写插件  2放入拦截器
+
+	返回DefaultSqlSession(configuration,executor,事务)
+
+SqlSession -》openSession()->openSessionFromDataSource()->DefaultSqlSession对象
+
+SqlSession -》 DefaultSqlSession对象 -》执行SQL
+
+ FileInputSTream("d://abc.txt"); ->InputSTream
+	字符串->流
+ 
+
+
+
+c/d.获取XxxMapper对象、执行
+
+
+	执行增删改查->MapperProxy/invoke()-->InvocationHandler ：JDK动态代理接口
+用到了 动态代理模式：增删改查 -> 代理对象 （MapperProxy对象）   ->代理对象 帮我们“代理执行” 增删改查 ->
+
+XxxMapper代理对象： MapperProxy对象
+
+
+mapperMethod.execute(sqlSession,args) ：实际调用增删改查的方法  ，依靠了sqlSession中的configuration和 executor..
+
+
+处理增删改查方法的参数：method.convertArgsToSqlCommandParam(args);： 如果參數是0个，reutrun null ;如果参数是1，返回第一个 ； 如果有多个参数 放入map中
+
+查询方法：selectOne() ->selectList() : configuration.getMappedStatement() 即获取到用于增删改查的对象
+
+boundSql ：将我们写的SQL 和 参数值进行了拼接后的对象，即最终能被真正执行的SQL
+
+执行SQL 是通过Executor 
+如果缓存中没有要查询的内容，则进入数据库 真实查询：queryFromDatabase()
+
+mybatis使用的jdbc對象是PreparedStatement
+底层执行增删改查：PreparedStatement的execute()
+
+MyBatis底层在执行CRUD时 可能会涉及到四个处理器：StatementHandler  ParameterHandler  TypeHandler  ResultSetHandler
+
+
+XxxMapper: 
+ SqlSession(configuration,executor,事务)、代理接口的对象(MapperInterface)、methodCache(存放查询缓存， 底层是CurrentHashMap)
+
+
+	Spring - SpringMVC - 数据库高级、MyBatis
+
+
+15.自定义插件
+	四个处理：StatementHandler  ParameterHandler   ResultSetHandler   TypeHandler
+	四大核心对象：StatementHandler  ParameterHandler   ResultSetHandler    Executor
+
+四大核心对象： 1.都涉及到了 拦截器 用于增强	 2.四大核心对象都包含了 该增强操作
+	自定义插件的编写逻辑： 根据MyBatis规则 编写一个  拦截器 ，在拦截器内部加入 自定义增强功能
+步骤：
+	a.编写拦截器
+	b.编写签名注解
+	@Intercepts({
+        @Signature(type = StatementHandler.class , method ="query",args = {Statement.class, ResultHandler.class})
+})
+	c.配置
+    <plugins>
+        <plugin interceptor="com.yanqun.my.interceptors.MyInterceptor">
+            <property name="name" value="zs"/>
+            <property name="age" value="23"/>
+        </plugin>
+    </plugins>
+	
+	编写多个拦截器时，执行顺序 和   <plugins>配置顺序一致
+
+
+插件
+
+
+
+
+   select * from student 	 ->拦截器 	
+
+
+目标对象target的包装后的产物 -> metaObject.getValue("可以从target中获取")
+
+通过打印语句 可知，target就是  RoutingStatementHandler
+-->
+metaObject.getValue("可以从RoutingStatementHandler中获取")
+
+->metaObject.getValue("可以从RoutingStatementHandler中获取 :boundSql/parameterHandler")
+
+->->metaObject.getValue("parameterHandler")		
+>->
+	metaObject.getValue("parameterHandler.parameterObject")	//XxxMapper.xml中的sql语句中的参数值
+	metaObject.getValue("parameterHandler.boundSql")	//XxxMapper.xml中的sql语句
+
+-->只研究
+		metaObject.setValue("parameterHandler.parameterObject",2)	
+
+metaObject.setValue("parameterHandler.boundSql.sql","select * from book...") 
+
+metaObject.setValue("parameterHandler.boundSql.parameterObject",2) 
+
+电子教材： 157468995  ->拉 公众号   
+
+
+15.批量操作DML
+	sessionFactory.openSession(ExecutorType.BATCH ); --推荐的写法
+
+日志
+	1.  log4j-1.2.17
+	2.  配置conf.xml
+ <settings>
+        <setting name="logImpl" value="LOG4J" />
+    </settings>
+	3. 日志配置文件log4j.properties
+log4j.rootLogger=DEBUG, stdout
+log4j.appender.stdout=org.apache.log4j.ConsoleAppender
+log4j.appender.stdout.layout=org.apache.log4j.PatternLayout
+log4j.appender.stdout.layout.ConversionPattern=%5p [%t] - %m%n
+
+
+
+BATCH: 预编译SQL一次 ，其余DML 只需要设置参数值即可
+insert into student(stuNo,stuName,stuAge,graName)
+          values(#{stuNo} , #{stuName},#{stuAge},#{graName})
+
+没有BATCH：
+	预编译N次 ，每次DML都需要 执行完整的SQL
+
+	
+不推荐的方式： 拼接SQL  
+
+
+
+oracle:批量插入
+	a.  create table 表 select ... from 旧表 
+	b.  insert into 表(...) select .. from 表 ;
+	c.  begin   ..(DML).. end ;
+	d.  数据泵、SQL Loader  、外部表
+
+
+以	c.  begin   ..(DML).. end ;为例
+
+	--核心：将SQL拼接成oracle能够执行的SQL   ； collection的参数必须是 collection或List
+
+mysql:批量插入
+	insert into student(stuno,stuname) values(100,'zsx'),(200,'lsx'),(200,'lsx'),(200,'lsx')...... ;
+
+
+	这种批量插入方式不推荐： 1.没有用到mybatis对批量插入的支持  2.不适合数据库迁移  3.如果大量数据，则会将 拼接的SQL语句拉的很长，而部分数据库 对SQL语句的长度有限制。
+
+
+insert into .... values(.....);
+insert into .... values(.....);
+insert into .... values(.....);
+insert into .... values(.....);
+insert into .... values(.....);
+insert into .... values(.....);
+insert into .... values(.....);
+
+
+调存储过程、存储函数    
+
+
+
+
+分页插件
+	PageHelper
+	1.jar
+	2.配置conf.xml中
+	3. PageHelper.startPage(2, 3);
+
+https://github.com/pagehelper/
+
+颜群老师微信：157468995
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+	
